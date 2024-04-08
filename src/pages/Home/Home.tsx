@@ -1,4 +1,4 @@
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useContext, useState } from "react";
 import {
   Box,
   InputAdornment,
@@ -6,16 +6,28 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import Layout from "../../components/Layout/Layout";
 import SearchIcon from "../../assets/icons/icon-search.svg";
-// import MoviesTrendList from "../../components/MoviesTrendList/MoviesTrendList";
-// import MoviesList from "../../components/MoviesList/MoviesList";
+import { MovieDataType } from "../../assets/data";
+import { MovieContext } from "../../context/movies-context";
+import Layout from "../../components/Layout/Layout";
+import MoviesTrendList from "../../components/MoviesTrendList/MoviesTrendList";
+import MoviesList from "../../components/MoviesList/MoviesList";
 
 const Home = () => {
   const [search, setSearch] = useState("");
+  const [searchList, setSearchList] = useState<MovieDataType[]>([]);
+
+  const { state } = useContext(MovieContext);
+  const { movies } = state;
+  const trendingList = movies.filter((movie) => movie.isTrending === true);
+  const recommendedList = movies.filter((movie) => movie.isTrending !== true);
 
   const handleSearch = (e: { target: { value: SetStateAction<string> } }) => {
     setSearch(e.target.value);
+    const newList = movies.filter((movie) =>
+      movie.title.toLowerCase().includes(search.toLowerCase())
+    );
+    setSearchList(newList);
   };
   return (
     <Layout>
@@ -61,24 +73,21 @@ const Home = () => {
               <Typography variant="h5" component="h1" my={8} fontWeight={400}>
                 Trending
               </Typography>
-              {/* <MoviesTrendList 
-              trendingList={trendingList} 
-              /> */}
+              <MoviesTrendList trendingList={trendingList} />
             </Box>
             <Box width="100%">
               <Typography variant="h5" component="h1" my={8} fontWeight={400}>
                 Recommended for you
               </Typography>
-              {/* <MoviesList 
-              recommendedList={recommendedList} 
-              /> */}
+              <MoviesList recommendedList={recommendedList} />
             </Box>
           </Box>
         ) : (
           <Box width="100%">
             <Typography variant="h5" component="h1" my={8} fontWeight={400}>
-              Found
+              Found {searchList.length} results for '{search}'
             </Typography>
+            <MoviesList recommendedList={searchList} />
           </Box>
         )}
       </Box>
